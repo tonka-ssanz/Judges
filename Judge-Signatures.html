@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Judge Signatures</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one working column, matching the SSANZ trial tools. Two steps: the form judges sign, then preparing each signature. */
+:root {
+  --bg: #f5f6f2;
+  --surface: #ffffff;
+  --ink: #1d2420;
+  --muted: #5d6a62;
+  --line: #d9ded7;
+  --accent: #2f6b4f;
+  --accent-ink: #ffffff;
+  --accent-soft: #e3efe8;
+  --warn: #8a5a12;
+  --warn-soft: #f6ecd9;
+  --check-a: #ffffff;
+  --check-b: #eef0ec;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141916; --surface: #1c2320; --ink: #e6ebe7; --muted: #9aa8a0; --line: #2f3933;
+    --accent: #6fbf95; --accent-ink: #0f1a14; --accent-soft: #213229; --warn: #e0b060; --warn-soft: #2e2618;
+    --check-a: #252c28; --check-b: #1f2522;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141916; --surface: #1c2320; --ink: #e6ebe7; --muted: #9aa8a0; --line: #2f3933;
+  --accent: #6fbf95; --accent-ink: #0f1a14; --accent-soft: #213229; --warn: #e0b060; --warn-soft: #2e2618;
+  --check-a: #252c28; --check-b: #1f2522;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.55; }
+.wrap { max-width: 820px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 64px; display: grid; gap: 28px; }
+header { display: grid; gap: 8px; }
+.eyebrow { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 700; margin: 0; }
+h1 { font-family: var(--font-display); font-size: clamp(30px, 6vw, 42px); line-height: 1.1; margin: 0; text-wrap: balance; }
+h2 { font-family: var(--font-display); font-size: 22px; margin: 0; text-wrap: balance; }
+h3 { font-family: var(--font-display); font-size: 17px; margin: 0; }
+.lede { margin: 0; color: var(--muted); max-width: 64ch; }
+.note { font-size: 14px; color: var(--muted); margin: 0; max-width: 66ch; }
+code { font-family: var(--font-mono); font-size: .9em; background: var(--accent-soft); padding: 1px 5px; border-radius: 4px; color: var(--ink); overflow-wrap: anywhere; }
+
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; border-bottom: 1px solid var(--line); }
+.tab { font: inherit; font-weight: 700; background: transparent; color: var(--muted); border: 0; border-bottom: 3px solid transparent; padding: 10px 4px; margin-right: 18px; cursor: pointer; border-radius: 0; }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.tab span { font-family: var(--font-mono); font-weight: 500; color: var(--accent); margin-right: 6px; }
+.tab:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+section.panel { display: grid; gap: 20px; }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.between { justify-content: space-between; }
+
+button { font: inherit; font-weight: 700; border-radius: 10px; padding: 11px 18px; cursor: pointer; border: 1px solid var(--accent); }
+button.primary { background: var(--accent); color: var(--accent-ink); }
+button.secondary { background: transparent; color: var(--accent); }
+button.small { padding: 6px 12px; font-size: 14px; border-radius: 999px; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+button:focus-visible, input:focus-visible, .drop:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+
+.copybox { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.copybox code { font-size: 15px; background: transparent; padding: 0; }
+
+/* ---------- The printed form ---------- */
+.sheet-box { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: #e9ebe6; padding: 18px; }
+.sheet { width: 182mm; min-height: 257mm; margin: 0 auto; background: #fff; color: #111; padding: 12mm 13mm; font-family: var(--font-body); font-size: 10.5pt; line-height: 1.42; display: grid; gap: 4.2mm; align-content: start; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
+.sheet .s-head { display: grid; gap: 1mm; border-bottom: 1.2pt solid #111; padding-bottom: 3mm; }
+.sheet .s-org { font-size: 8.5pt; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; color: #2f6b4f; }
+.sheet h2 { font-family: var(--font-display); font-size: 20pt; color: #111; line-height: 1.1; }
+.sheet p { margin: 0; }
+.sheet .s-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm 8mm; }
+.sheet .s-field { display: grid; gap: 1mm; }
+.sheet .s-field b { font-size: 8.5pt; letter-spacing: .06em; text-transform: uppercase; }
+.sheet .s-field i { display: block; height: 9mm; border-bottom: 0.8pt solid #111; }
+.sheet .s-field.wide { grid-column: 1 / -1; }
+.sheet .s-consent { border: 0.8pt solid #111; padding: 3.5mm 4mm; display: grid; gap: 2mm; }
+.sheet .s-consent h3 { font-size: 11pt; color: #111; }
+.sheet .s-consent ul { margin: 0; padding-left: 5mm; display: grid; gap: 1mm; }
+.sheet .s-boxes { display: grid; gap: 3mm; }
+.sheet .s-box { height: 26mm; border: 0.8pt dashed #b5b5b5; border-radius: 2mm; position: relative; }
+.sheet .s-box::before { content: attr(data-n); position: absolute; top: 1.5mm; left: 2.5mm; font-size: 8pt; color: #9a9a9a; }
+.sheet .s-box::after { content: ""; position: absolute; left: 10mm; right: 10mm; bottom: 7mm; border-bottom: 0.6pt solid #c4c4c4; }
+.sheet .s-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; }
+.sheet .s-cols h3 { font-size: 10.5pt; color: #111; margin-bottom: 1mm; }
+.sheet .s-cols ul, .sheet .s-cols ol { margin: 0; padding-left: 5mm; display: grid; gap: .8mm; }
+.sheet .s-mail { font-family: var(--font-mono); font-weight: 500; }
+.sheet .s-foot { font-size: 8pt; color: #555; border-top: 0.6pt solid #999; padding-top: 2mm; }
+
+/* ---------- Prepare ---------- */
+.modes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 560px) { .modes { grid-template-columns: 1fr; } }
+.mode { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; align-items: start; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; cursor: pointer; background: var(--surface); }
+.mode:hover { border-color: var(--accent); }
+.mode:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+.mode input { margin: 4px 0 0; accent-color: var(--accent); grid-row: span 2; }
+.mode span { font-size: 14px; color: var(--muted); }
+
+.drop { border: 2px dashed var(--line); border-radius: 14px; background: var(--surface); padding: 24px 20px; text-align: center; cursor: pointer; display: grid; gap: 4px; justify-items: center; transition: border-color .15s, background .15s; }
+.drop:hover, .drop.over { border-color: var(--accent); background: var(--accent-soft); }
+.drop strong { font-family: var(--font-display); font-size: 19px; }
+.drop span { color: var(--muted); font-size: 14px; }
+
+.status { margin: 0; padding: 12px 14px; border-radius: 10px; background: var(--accent-soft); font-size: 15px; }
+.status.error { background: var(--warn-soft); border: 1px solid var(--warn); color: var(--ink); }
+
+.card { display: grid; gap: 12px; padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); min-width: 0; }
+.card-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 12px; }
+.tag { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; }
+
+.stage { position: relative; border-radius: 10px; overflow: hidden; background: #222; touch-action: none; user-select: none; }
+.stage canvas { display: block; width: 100%; height: auto; cursor: crosshair; }
+.draw-pad { position: relative; border: 1px solid var(--line); border-radius: 10px; background: #fff; touch-action: none; }
+.draw-pad canvas { display: block; width: 100%; height: 220px; cursor: crosshair; }
+.draw-pad::after { content: "Sign above this line"; position: absolute; left: 6%; right: 6%; bottom: 46px; border-top: 1px solid #c9ccc6; padding-top: 4px; font-size: 12px; color: #8a8f88; pointer-events: none; }
+
+.slider { display: grid; gap: 4px; max-width: 420px; }
+.slider label { font-size: 13px; font-weight: 700; color: var(--muted); }
+.slider input { width: 100%; accent-color: var(--accent); }
+.slider .ends { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+
+.previews { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 620px) { .previews { grid-template-columns: 1fr; } }
+.pv { display: grid; gap: 6px; min-width: 0; }
+.pv > b { font-size: 13px; color: var(--muted); }
+.pv-check { border: 1px solid var(--line); border-radius: 10px; min-height: 130px; display: grid; place-items: center; padding: 12px; background: repeating-conic-gradient(var(--check-a) 0 25%, var(--check-b) 0 50%) 0 0 / 16px 16px; }
+.pv-check img { max-height: 110px; max-width: 100%; height: auto; object-fit: contain; }
+.pv-cert { border: 1px solid #d8d2c2; border-radius: 4px; background: #fffdf7; color: #222; min-height: 130px; padding: 14px 18px 10px; display: grid; align-content: end; justify-items: center; gap: 0; }
+.pv-cert img { max-height: 62px; max-width: 70%; height: auto; object-fit: contain; margin-bottom: -6px; }
+.pv-cert .line { width: 72%; border-top: 1px solid #555; }
+.pv-cert small { font-size: 12px; color: #444; padding-top: 3px; text-align: center; }
+.meta { font-family: var(--font-mono); font-size: 13px; color: var(--muted); margin: 0; overflow-wrap: anywhere; }
+.warnline { margin: 0; font-size: 14px; color: var(--warn); }
+
+.fields { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 12px; }
+@media (max-width: 560px) { .fields { grid-template-columns: 1fr; } }
+.field { display: grid; gap: 4px; min-width: 0; }
+.field label { font-size: 13px; font-weight: 700; color: var(--muted); }
+.field input { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; width: 100%; min-width: 0; }
+.tick { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; cursor: pointer; }
+.tick:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+.tick input { width: 18px; height: 18px; margin: 3px 0 0; accent-color: var(--accent); }
+
+.after { display: grid; gap: 8px; padding: 16px 18px; border-radius: 12px; border: 1px solid var(--accent); background: var(--accent-soft); }
+.after ol { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+
+.help { border-top: 1px solid var(--line); padding-top: 20px; display: grid; gap: 10px; font-size: 15px; }
+.help ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; color: var(--muted); max-width: 66ch; }
+.help li b { color: var(--ink); }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* Printing: only the form, on one A4 page. */
+@page { size: A4; margin: 0; }
+@media print {
+  body { background: #fff; }
+  body.print-form .wrap > *:not(#formPanel) { display: none !important; }
+  body.print-form #formPanel > *:not(.sheet-box) { display: none !important; }
+  body.print-form .wrap { padding: 0; display: block; max-width: none; }
+  body.print-form .sheet-box { border: 0; padding: 0; background: #fff; overflow: visible; }
+  body.print-form .sheet { box-shadow: none; width: 210mm; min-height: 0; height: 296mm; padding: 13mm 16mm; overflow: hidden; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">SSANZ Judges Development Subcommittee</p>
+    <h1>Judge Signatures</h1>
+    <p class="lede">For the signature custodian. Send judges the signature form, then turn each returned photo or scan into a clean signature file for printing on trial certificates and judging sheets. Everything happens in this page; no image is uploaded anywhere.</p>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Steps">
+    <button class="tab" role="tab" id="tabForm" aria-controls="formPanel" aria-selected="false" type="button"><span>1</span>Form for judges</button>
+    <button class="tab" role="tab" id="tabPrep" aria-controls="prepPanel" aria-selected="true" type="button"><span>2</span>Prepare a signature</button>
+  </div>
+
+  <!-- ===== Step 1: the form ===== -->
+  <section class="panel" id="formPanel" role="tabpanel" aria-labelledby="tabForm" hidden>
+    <div class="row between">
+      <p class="note">Print it, or choose <b>Save as PDF</b> in the print window to make a file to email. One A4 page.</p>
+      <button class="primary" id="printForm" type="button">Print or save as PDF</button>
+    </div>
+    <p class="status error" id="printNote" hidden>Printing isn't available in this preview. Open the downloaded page in your browser to print.</p>
+    <div class="sheet-box">
+      <article class="sheet" aria-label="Judge signature form">
+        <div class="s-head">
+          <span class="s-org">SSANZ · Judges Development Subcommittee</span>
+          <h2>Judge's Signature Form</h2>
+        </div>
+        <p>SSANZ is offering trial organisers the option of printing judges' signatures on judging sheets, and on certificates where they can print them, to help everything run smoothly on the day of the trial. It also saves you hand-signing each one. If you're happy to take part, please fill in this form, sign three times in the boxes, and send it back.</p>
+        <div class="s-fields">
+          <div class="s-field wide"><b>Your name, as it should appear on trial documents</b><i></i></div>
+          <div class="s-field"><b>Email</b><i></i></div>
+          <div class="s-field"><b>Date</b><i></i></div>
+        </div>
+        <div class="s-consent">
+          <h3>What you're agreeing to</h3>
+          <ul>
+            <li>SSANZ may keep a digital copy of your signature and print it <b>only on certificates and judging sheets for trials you judge</b>. It won't be used on any other document.</li>
+            <li>It will be kept, with the other judges' signatures, in a single password-protected file in the members-only area of the SSANZ website, managed by the Judges Development Subcommittee administrator.</li>
+            <li>Organisations running trials will download that file to their own computers to prepare the certificates and judging sheets for trials you judge.</li>
+            <li>You can withdraw at any time by emailing <span class="s-mail">ssanzjdsubcommittee@gmail.com</span>. Your signature will be removed from the next version of the file.</li>
+          </ul>
+          <p><b>By signing in the boxes below, you agree to the points above.</b></p>
+        </div>
+        <div class="s-boxes">
+          <div class="s-box" data-n="Signature 1"></div>
+          <div class="s-box" data-n="Signature 2"></div>
+          <div class="s-box" data-n="Signature 3"></div>
+        </div>
+        <div class="s-cols">
+          <div>
+            <h3>For a clean signature</h3>
+            <ul>
+              <li>Use a black felt-tip or gel pen, not ballpoint or blue ink.</li>
+              <li>Sign inside each box, not touching the edges.</li>
+              <li>Photograph in good daylight, phone held directly above, no shadow on the page.</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Sending it back</h3>
+            <ol>
+              <li>Email a photo or scan to <span class="s-mail">ssanzjdsubcommittee@gmail.com</span>, or post it or hand it to the administrator.</li>
+              <li>Put your name in the subject line.</li>
+              <li>Please send it to this address only. You'll get a reply when it arrives.</li>
+            </ol>
+          </div>
+        </div>
+        <p class="s-foot">Your photo and this form are deleted once your signature has been prepared. Personal information is handled under the Privacy Act 2020.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ===== Step 2: prepare ===== -->
+  <section class="panel" id="prepPanel" role="tabpanel" aria-labelledby="tabPrep">
+    <div class="modes" role="radiogroup" aria-label="Where the signature comes from">
+      <label class="mode"><input type="radio" name="src" id="srcPhoto" value="photo" checked><b>From a photo or scan</b><span>A returned signature form</span></label>
+      <label class="mode"><input type="radio" name="src" id="srcDraw" value="draw"><b>Draw it here</b><span>With a finger, stylus or mouse</span></label>
+    </div>
+
+    <div id="photoBox" class="panel">
+      <label class="drop" id="drop" for="file" tabindex="0">
+        <strong>Drop the photo or scan here</strong>
+        <span>or click to choose · JPG, PNG or a PDF scan's page saved as an image</span>
+        <input type="file" id="file" accept="image/*" hidden>
+      </label>
+      <p class="status" id="status" hidden></p>
+
+      <div class="card" id="cropCard">
+        <div class="card-head">
+          <h2>Pick one signature</h2>
+          <span class="tag" id="exampleTag">Example photo</span>
+        </div>
+        <p class="note">Drag a box around the best of the three signatures, staying inside the dashed box on the form.</p>
+        <div class="stage" id="stage"><canvas id="photoCanvas" aria-label="Photo of the signature form. Drag to select one signature."></canvas></div>
+        <div class="row">
+          <button class="secondary small" id="rotate" type="button">Rotate a quarter turn</button>
+          <button class="secondary small" id="whole" type="button">Select whole photo</button>
+        </div>
+        <div class="slider">
+          <label for="strength">Background clean-up</label>
+          <input type="range" id="strength" min="60" max="94" value="80">
+          <div class="ends"><span>Keep faint strokes</span><span>Remove more shadow</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="drawBox" class="card" hidden>
+      <div class="card-head"><h2>Sign in the box</h2><button class="secondary small" id="clearDraw" type="button">Clear</button></div>
+      <div class="draw-pad"><canvas id="drawCanvas" aria-label="Signature drawing area"></canvas></div>
+      <p class="note">Sign slowly and fairly large. On a phone, turning it sideways gives more room.</p>
+    </div>
+
+    <div class="card" id="resultCard">
+      <div class="card-head"><h2>The finished signature</h2></div>
+      <div class="previews">
+        <div class="pv"><b>Signature file (see-through background)</b><div class="pv-check"><img id="outImg" alt="Prepared signature"></div></div>
+        <div class="pv"><b>How it will sit on a certificate</b>
+          <div class="pv-cert"><img id="certImg" alt=""><span class="line"></span><small id="certName">Judge</small></div>
+        </div>
+      </div>
+      <p class="meta" id="outMeta"></p>
+      <p class="warnline" id="outWarn" hidden></p>
+    </div>
+
+    <div class="card" id="saveCard">
+      <h2>Save it</h2>
+      <div class="fields">
+        <div class="field"><label for="judgeName">Judge's name, exactly as in the judges list</label><input id="judgeName" type="text" autocomplete="off" placeholder="e.g. Sam Example"></div>
+        <div class="field"><label for="received">Form received</label><input id="received" type="date"></div>
+      </div>
+      <label class="tick"><input type="checkbox" id="consent"><span>The judge has agreed in writing to their signature being used on certificates and judging sheets (the signed form, or an email saying so).</span></label>
+      <div class="row">
+        <button class="primary" id="save" type="button" disabled>Save signature file</button>
+        <span class="note" id="saveNote">Add the judge's name and tick the consent box to save.</span>
+      </div>
+    </div>
+
+    <div class="after" id="after" hidden>
+      <h3>Saved. Now finish off:</h3>
+      <ol>
+        <li>Add <code id="savedName">file.png</code> to the signature set and update its version date.</li>
+        <li>Reply to the judge to say their signature arrived and has been set up.</li>
+        <li>Delete the judge's email and the photo from your computer, phone and email trash.</li>
+        <li>Keep the signed consent form (or consent email) with the subcommittee's records.</li>
+      </ol>
+    </div>
+
+    <section class="help">
+      <h3>Good to know</h3>
+      <ul>
+        <li><b>Nothing leaves your computer.</b> The photo is read and cleaned in this page, and the finished file is saved straight to your Downloads folder.</li>
+        <li><b>File name</b> is the judge's name, e.g. <code>Sam Example.png</code>. The trial tools will match it against the judge's name, so type it exactly as it appears in the judges list, with the same spelling and spacing.</li>
+        <li><b>Size:</b> files are saved at about 1000 pixels wide at most. That prints cleanly on a certificate and is too small to make a convincing full-size copy.</li>
+        <li><b>Blotchy or grey background?</b> Move the clean-up slider towards <b>Remove more shadow</b>. If strokes break up, move it the other way. A very dark or blurry photo can't be rescued; ask the judge for another in daylight.</li>
+        <li><b>iPhone photos (HEIC)</b> may not open. Email the photo to yourself (it's sent as a JPG) or take a screenshot of it, then drop that in.</li>
+        <li><b>A judge withdraws?</b> Delete their file from the signature set and issue a new version, so older copies stop being used.</li>
+      </ul>
+    </section>
+  </section>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+/* ---------- Tabs ---------- */
+function showTab(which) {
+  const form = which === "form";
+  $("tabForm").setAttribute("aria-selected", form);
+  $("tabPrep").setAttribute("aria-selected", !form);
+  $("formPanel").hidden = !form;
+  $("prepPanel").hidden = form;
+  if (!form) render();
+}
+$("tabForm").addEventListener("click", () => { showTab("form"); try { history.replaceState(null, "", "#form"); } catch {} });
+$("tabPrep").addEventListener("click", () => { showTab("prep"); try { history.replaceState(null, "", "#prepare"); } catch {} });
+window.addEventListener("hashchange", () => showTab(location.hash === "#form" ? "form" : "prep"));
+
+$("printForm").addEventListener("click", () => {
+  document.body.classList.add("print-form");
+  const before = Date.now();
+  try { window.print(); } catch {}
+  document.body.classList.remove("print-form");
+  // In a locked-down preview the print window never opens; say so.
+  if (Date.now() - before < 60) $("printNote").hidden = false;
+});
+
+/* ---------- Signature cleaning (pure canvas work) ----------
+   Works out the paper brightness around every point (so shadows and uneven light drop out),
+   keeps only marks clearly darker than the paper, and makes everything else see-through. */
+function cleanSignature(src, strength) {
+  const w = src.width, h = src.height;
+  const d = src.getContext("2d", { willReadFrequently: true }).getImageData(0, 0, w, h).data;
+  const gray = document.createElement("canvas"); gray.width = w; gray.height = h;
+  const gctx = gray.getContext("2d", { willReadFrequently: true });
+  const gi = gctx.createImageData(w, h);
+  for (let i = 0; i < d.length; i += 4) {
+    const l = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+    gi.data[i] = gi.data[i + 1] = gi.data[i + 2] = l; gi.data[i + 3] = 255;
+  }
+  gctx.putImageData(gi, 0, 0);
+  // Paper brightness map: shrink, take the brightest nearby cell (removes ink), stretch back smoothly.
+  const cell = Math.max(8, Math.round(Math.max(w, h) / 60));
+  const sw = Math.max(1, Math.ceil(w / cell)), sh = Math.max(1, Math.ceil(h / cell));
+  const small = document.createElement("canvas"); small.width = sw; small.height = sh;
+  const sctx = small.getContext("2d", { willReadFrequently: true });
+  sctx.drawImage(gray, 0, 0, sw, sh);
+  const sd = sctx.getImageData(0, 0, sw, sh);
+  const src1 = Array.from({ length: sw * sh }, (_, k) => sd.data[k * 4]);
+  const r = 2, mx = new Float32Array(sw * sh);
+  for (let y = 0; y < sh; y++) for (let x = 0; x < sw; x++) {
+    let m = 0;
+    for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
+      const xx = x + dx, yy = y + dy;
+      if (xx >= 0 && yy >= 0 && xx < sw && yy < sh) m = Math.max(m, src1[yy * sw + xx]);
+    }
+    mx[y * sw + x] = m;
+  }
+  for (let k = 0; k < sw * sh; k++) { sd.data[k * 4] = sd.data[k * 4 + 1] = sd.data[k * 4 + 2] = mx[k]; }
+  sctx.putImageData(sd, 0, 0);
+  const bg = document.createElement("canvas"); bg.width = w; bg.height = h;
+  const bctx = bg.getContext("2d", { willReadFrequently: true });
+  bctx.imageSmoothingEnabled = true; bctx.imageSmoothingQuality = "high";
+  bctx.drawImage(small, 0, 0, w, h);
+  const bd = bctx.getImageData(0, 0, w, h).data;
+  const out = document.createElement("canvas"); out.width = w; out.height = h;
+  const octx = out.getContext("2d");
+  const od = octx.createImageData(w, h);
+  const cut = strength, soft = 0.14;
+  for (let i = 0; i < d.length; i += 4) {
+    const ratio = gi.data[i] / Math.max(40, bd[i]);
+    const a = Math.min(1, Math.max(0, (cut - ratio) / soft));
+    od.data[i] = 20; od.data[i + 1] = 22; od.data[i + 2] = 26; od.data[i + 3] = Math.round(a * 255);
+  }
+  octx.putImageData(od, 0, 0);
+  return out;
+}
+
+/* Trim to the ink, add a small margin, and cap the size. Returns null if there's no ink. */
+function finishSignature(canvas) {
+  const w = canvas.width, h = canvas.height;
+  const d = canvas.getContext("2d", { willReadFrequently: true }).getImageData(0, 0, w, h).data;
+  // Ignore lone specks: a column/row counts only if it has a few solid pixels.
+  const cols = new Uint32Array(w), rows = new Uint32Array(h);
+  let ink = 0;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (d[(y * w + x) * 4 + 3] > 110) { cols[x]++; rows[y]++; ink++; }
+  if (ink < 40) return null;
+  const need = Math.max(2, Math.round(Math.min(w, h) / 300));
+  let x0 = cols.findIndex(c => c >= need), x1 = w - 1 - [...cols].reverse().findIndex(c => c >= need);
+  let y0 = rows.findIndex(c => c >= need), y1 = h - 1 - [...rows].reverse().findIndex(c => c >= need);
+  if (x0 < 0 || y0 < 0) return null;
+  const pad = Math.round(Math.max(x1 - x0, y1 - y0) * 0.04) + 2;
+  x0 = Math.max(0, x0 - pad); y0 = Math.max(0, y0 - pad); x1 = Math.min(w - 1, x1 + pad); y1 = Math.min(h - 1, y1 + pad);
+  const cw = x1 - x0 + 1, ch = y1 - y0 + 1;
+  const scale = Math.min(1, 1000 / cw, 320 / ch);
+  const out = document.createElement("canvas");
+  out.width = Math.max(1, Math.round(cw * scale)); out.height = Math.max(1, Math.round(ch * scale));
+  const o = out.getContext("2d"); o.imageSmoothingEnabled = true; o.imageSmoothingQuality = "high";
+  o.drawImage(canvas, x0, y0, cw, ch, 0, 0, out.width, out.height);
+  return { canvas: out, srcWidth: cw };
+}
+
+/* ---------- Photo, rotation and crop ---------- */
+let photo = null;        // canvas holding the (rotated) photo at full size
+let example = true;
+let crop = null;         // {x,y,w,h} in photo pixels
+let result = null;       // finished canvas
+let mode = "photo";
+
+const pc = $("photoCanvas");
+function drawStage() {
+  if (!photo) return;
+  const scale = Math.min(1, 1600 / photo.width);
+  pc.width = Math.round(photo.width * scale); pc.height = Math.round(photo.height * scale);
+  const c = pc.getContext("2d");
+  c.drawImage(photo, 0, 0, pc.width, pc.height);
+  if (crop) {
+    const k = pc.width / photo.width;
+    const r = { x: crop.x * k, y: crop.y * k, w: crop.w * k, h: crop.h * k };
+    c.save();
+    c.fillStyle = "rgba(10,20,15,.55)";
+    c.beginPath(); c.rect(0, 0, pc.width, pc.height); c.rect(r.x, r.y, r.w, r.h); c.fill("evenodd");
+    c.strokeStyle = "#6fbf95"; c.lineWidth = Math.max(2, pc.width / 400); c.setLineDash([10, 6]);
+    c.strokeRect(r.x, r.y, r.w, r.h);
+    c.restore();
+  }
+}
+function wholePhoto() { crop = { x: 0, y: 0, w: photo.width, h: photo.height }; }
+
+let dragFrom = null;
+function photoPoint(e) {
+  const b = pc.getBoundingClientRect();
+  return { x: Math.min(1, Math.max(0, (e.clientX - b.left) / b.width)) * photo.width,
+           y: Math.min(1, Math.max(0, (e.clientY - b.top) / b.height)) * photo.height };
+}
+pc.addEventListener("pointerdown", e => { if (!photo) return; pc.setPointerCapture(e.pointerId); dragFrom = photoPoint(e); });
+pc.addEventListener("pointermove", e => {
+  if (!dragFrom) return;
+  const p = photoPoint(e);
+  crop = { x: Math.min(dragFrom.x, p.x), y: Math.min(dragFrom.y, p.y), w: Math.abs(p.x - dragFrom.x), h: Math.abs(p.y - dragFrom.y) };
+  drawStage();
+});
+pc.addEventListener("pointerup", () => {
+  if (!dragFrom) return;
+  dragFrom = null;
+  if (!crop || crop.w < 20 || crop.h < 10) wholePhoto();
+  drawStage(); render();
+});
+$("whole").addEventListener("click", () => { if (photo) { wholePhoto(); drawStage(); render(); } });
+$("rotate").addEventListener("click", () => {
+  if (!photo) return;
+  const r = document.createElement("canvas"); r.width = photo.height; r.height = photo.width;
+  const c = r.getContext("2d"); c.translate(r.width, 0); c.rotate(Math.PI / 2); c.drawImage(photo, 0, 0);
+  photo = r; wholePhoto(); drawStage(); render();
+});
+$("strength").addEventListener("input", () => render());
+
+function showStatus(msg, isError) {
+  const s = $("status"); s.textContent = msg; s.className = "status" + (isError ? " error" : ""); s.hidden = !msg;
+}
+
+function loadFile(file) {
+  if (!file) return;
+  if (!/^image\//.test(file.type) && !/\.(jpe?g|png|webp|gif|bmp|heic|heif)$/i.test(file.name)) {
+    showStatus("That isn't a picture file. Drop a JPG or PNG photo or scan of the signed form.", true); return;
+  }
+  showStatus("Opening " + file.name + "…");
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.onload = () => {
+    const c = document.createElement("canvas"); c.width = img.naturalWidth; c.height = img.naturalHeight;
+    c.getContext("2d").drawImage(img, 0, 0);
+    URL.revokeObjectURL(url);
+    photo = c; example = false; wholePhoto();
+    $("exampleTag").hidden = true;
+    showStatus("Now drag a box around the best signature.");
+    drawStage(); render();
+  };
+  img.onerror = () => {
+    URL.revokeObjectURL(url);
+    showStatus(/\.hei[cf]$/i.test(file.name) || /hei[cf]/i.test(file.type)
+      ? "This is an iPhone HEIC photo, which this page can't open. Email the photo to yourself (it arrives as a JPG) or take a screenshot of it, then drop that in."
+      : "This picture couldn't be opened. Try saving it as a JPG or PNG and dropping it in again.", true);
+  };
+  img.src = url;
+}
+$("file").addEventListener("change", e => { loadFile(e.target.files[0]); e.target.value = ""; });
+const drop = $("drop");
+["dragenter", "dragover"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave", "drop"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", e => loadFile(e.dataTransfer.files[0]));
+drop.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("file").click(); } });
+
+/* ---------- Drawing ---------- */
+const dc = $("drawCanvas");
+let drawn = false, pen = null;
+function sizeDraw() {
+  const b = dc.getBoundingClientRect();
+  if (!b.width) return;
+  const w = Math.round(b.width * 2), h = Math.round(b.height * 2);
+  if (dc.width === w && dc.height === h) return;
+  dc.width = w; dc.height = h; drawn = false;
+}
+function drawPoint(e) { const b = dc.getBoundingClientRect(); return { x: (e.clientX - b.left) * dc.width / b.width, y: (e.clientY - b.top) * dc.height / b.height }; }
+dc.addEventListener("pointerdown", e => {
+  dc.setPointerCapture(e.pointerId);
+  const p = drawPoint(e); pen = { last: p, mid: p };
+  const c = dc.getContext("2d"); c.fillStyle = "#14161a"; c.beginPath(); c.arc(p.x, p.y, 2.6, 0, Math.PI * 2); c.fill();
+});
+dc.addEventListener("pointermove", e => {
+  if (!pen) return;
+  const p = drawPoint(e), c = dc.getContext("2d");
+  const mid = { x: (pen.last.x + p.x) / 2, y: (pen.last.y + p.y) / 2 };
+  c.strokeStyle = "#14161a"; c.lineWidth = e.pressure && e.pointerType === "pen" ? 3 + e.pressure * 4 : 5.2;
+  c.lineCap = "round"; c.lineJoin = "round";
+  c.beginPath(); c.moveTo(pen.mid.x, pen.mid.y); c.quadraticCurveTo(pen.last.x, pen.last.y, mid.x, mid.y); c.stroke();
+  pen = { last: p, mid }; drawn = true;
+});
+["pointerup", "pointercancel"].forEach(t => dc.addEventListener(t, () => { if (pen) { pen = null; render(); } }));
+$("clearDraw").addEventListener("click", () => { dc.getContext("2d").clearRect(0, 0, dc.width, dc.height); drawn = false; render(); });
+
+["srcPhoto", "srcDraw"].forEach(id => $(id).addEventListener("change", e => {
+  mode = e.target.value;
+  $("photoBox").hidden = mode !== "photo";
+  $("drawBox").hidden = mode !== "draw";
+  if (mode === "draw") sizeDraw();
+  render();
+}));
+window.addEventListener("resize", () => { if (mode === "draw" && !drawn) sizeDraw(); });
+
+/* ---------- Result and saving ---------- */
+let renderTimer = 0;
+function render() { clearTimeout(renderTimer); renderTimer = setTimeout(renderNow, 30); }
+function renderNow() {
+  result = null;
+  let srcW = 0;
+  if (mode === "photo" && photo && crop) {
+    const c = document.createElement("canvas");
+    c.width = Math.max(1, Math.round(crop.w)); c.height = Math.max(1, Math.round(crop.h));
+    c.getContext("2d").drawImage(photo, crop.x, crop.y, crop.w, crop.h, 0, 0, c.width, c.height);
+    const fin = finishSignature(cleanSignature(c, $("strength").value / 100));
+    if (fin) { result = fin.canvas; srcW = fin.srcWidth; }
+  } else if (mode === "draw" && drawn) {
+    const fin = finishSignature(dc);
+    if (fin) { result = fin.canvas; srcW = fin.srcWidth; }
+  }
+  const warn = $("outWarn");
+  warn.hidden = true;
+  if (result) {
+    const url = result.toDataURL("image/png");
+    $("outImg").src = url; $("certImg").src = url;
+    $("outImg").hidden = $("certImg").hidden = false;
+    $("outMeta").textContent = `${result.width} × ${result.height} pixels · PNG with a see-through background` + (example && mode === "photo" ? " · example" : "");
+    const msgs = [];
+    if (mode === "photo" && srcW < 450) msgs.push("This signature is small in the photo, so it may print slightly soft. A closer photo would be better.");
+    if (mode === "photo" && crop && photo && crop.w > photo.width * 0.9 && crop.h > photo.height * 0.9 && !example) msgs.push("The whole photo is selected. Drag a box around just one signature.");
+    if (msgs.length) { warn.textContent = msgs.join(" "); warn.hidden = false; }
+  } else {
+    $("outImg").hidden = $("certImg").hidden = true;
+    $("outMeta").textContent = mode === "draw" ? "Sign in the box above to see the result." : "No signature found in the selected area. Drag a box around one signature, or move the clean-up slider left.";
+  }
+  updateSave();
+}
+
+function safeName(n) { return n.replace(/[\\/:*?"<>|]+/g, " ").replace(/\s+/g, " ").trim(); }
+function updateSave() {
+  const name = safeName($("judgeName").value);
+  $("certName").textContent = name ? name + ", Judge" : "Judge";
+  const ok = result && name && $("consent").checked && !(example && mode === "photo");
+  $("save").disabled = !ok;
+  const note = $("saveNote");
+  if (example && mode === "photo") note.textContent = "This is an example. Drop a real photo to save a signature.";
+  else if (!result) note.textContent = "Prepare a signature first.";
+  else if (!name) note.textContent = "Add the judge's name to save.";
+  else if (!$("consent").checked) note.textContent = "Tick the consent box to save.";
+  else note.textContent = `Saves as ${name}.png`;
+}
+$("judgeName").addEventListener("input", updateSave);
+$("consent").addEventListener("change", updateSave);
+try { $("received").valueAsDate = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000); } catch {}
+
+$("save").addEventListener("click", () => {
+  if ($("save").disabled || !result) return;
+  const name = safeName($("judgeName").value) + ".png";
+  result.toBlob(blob => {
+    if (!blob) { $("saveNote").textContent = "The file couldn't be made. Try again."; return; }
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    $("savedName").textContent = name;
+    $("after").hidden = false;
+    $("saveNote").textContent = `Saved as ${name} in your Downloads folder.`;
+  }, "image/png");
+});
+
+/* ---------- Opening view: a made-up photographed form, so the clean-up is visible straight away ---------- */
+function examplePhoto() {
+  const w = 1400, h = 560, c = document.createElement("canvas"); c.width = w; c.height = h;
+  const x = c.getContext("2d");
+  const g = x.createLinearGradient(0, 0, w, h);
+  g.addColorStop(0, "#eeede7"); g.addColorStop(0.6, "#e2e0d8"); g.addColorStop(1, "#b9b6ad");   // uneven light and a shadow
+  x.fillStyle = g; x.fillRect(0, 0, w, h);
+  const r = x.createRadialGradient(w * 0.85, h * 0.9, 20, w * 0.85, h * 0.9, 420);
+  r.addColorStop(0, "rgba(60,55,50,.28)"); r.addColorStop(1, "rgba(60,55,50,0)");
+  x.fillStyle = r; x.fillRect(0, 0, w, h);
+  x.setLineDash([12, 8]); x.strokeStyle = "#bdbcb6"; x.lineWidth = 3; x.strokeRect(70, 70, w - 140, h - 140);
+  x.setLineDash([]); x.strokeStyle = "#cfcdc6"; x.beginPath(); x.moveTo(180, h - 160); x.lineTo(w - 180, h - 160); x.stroke();
+  x.strokeStyle = "#1f2130"; x.lineCap = "round"; x.lineJoin = "round"; x.lineWidth = 7;
+  const path = new Path2D("M230 330 C 250 170, 330 140, 320 240 C 310 330, 250 400, 230 380 C 210 350, 300 300, 360 330 C 400 350, 420 260, 440 300 C 455 335, 470 330, 490 290 C 505 260, 520 320, 545 310 C 570 300, 560 250, 600 270 C 640 290, 610 340, 650 330 C 700 315, 690 210, 730 180 C 770 150, 760 260, 740 330 C 725 380, 780 360, 800 320 C 820 285, 850 300, 860 320 C 875 345, 900 340, 920 300 C 945 255, 980 270, 990 305 C 1000 340, 1060 330, 1100 300 C 1140 270, 1180 290, 1200 300");
+  x.stroke(path);
+  x.lineWidth = 5; x.beginPath(); x.moveTo(300, 395); x.bezierCurveTo(600, 420, 900, 390, 1150, 360); x.stroke();
+  const id = x.getImageData(0, 0, w, h);
+  for (let i = 0; i < id.data.length; i += 4) { const n = (Math.random() - 0.5) * 14; id.data[i] += n; id.data[i + 1] += n; id.data[i + 2] += n; }
+  x.putImageData(id, 0, 0);
+  return c;
+}
+photo = examplePhoto();
+crop = { x: 120, y: 110, w: 1160, h: 330 };
+showTab(location.hash === "#form" ? "form" : "prep");
+drawStage();
+renderNow();
+</script>
+</body>
+</html>
