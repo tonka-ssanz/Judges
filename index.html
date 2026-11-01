@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SSANZ Judges Tools</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+:root {
+  --bg: #f5f6f2; --surface: #ffffff; --ink: #1d2420; --muted: #5d6a62; --line: #d9ded7;
+  --accent: #2f6b4f; --accent-soft: #e3efe8;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #141916; --surface: #1c2320; --ink: #e6ebe7; --muted: #9aa8a0; --line: #2f3933; --accent: #6fbf95; --accent-soft: #213229; color-scheme: dark; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.55; }
+.wrap { max-width: 680px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 48px 64px; display: grid; gap: 24px; }
+.eyebrow { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 700; margin: 0; }
+h1 { font-family: var(--font-display); font-size: clamp(28px, 6vw, 38px); line-height: 1.1; margin: 4px 0 0; }
+.list { display: grid; gap: 12px; }
+a.item { display: grid; gap: 2px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); text-decoration: none; }
+a.item:hover { border-color: var(--accent); background: var(--accent-soft); }
+a.item:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+a.item b { font-size: 18px; color: var(--accent); }
+a.item span { color: var(--muted); font-size: 15px; }
+footer { color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); padding-top: 16px; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <p class="eyebrow">SSANZ Judges Development Subcommittee</p>
+    <h1>Judges Tools</h1>
+  </header>
+  <nav class="list" aria-label="Tools and forms">
+    <a class="item" href="Judge-Signatures.html">
+      <b>Judge Signatures</b>
+      <span>For the signature custodian: the form for judges, and turning a returned photo into a clean signature file.</span>
+    </a>
+    <a class="item" href="SSANZ-Judge-Signature-Form.pdf" target="_blank" rel="noopener">
+      <b>Judge's Signature Form (PDF)</b>
+      <span>One A4 page for judges to sign and send back.</span>
+    </a>
+  </nav>
+  <footer>Questions: ssanzjdsubcommittee@gmail.com</footer>
+</main>
+</body>
+</html>
