@@ -187,7 +187,7 @@ button:focus-visible, input:focus-visible, .drop:focus-visible { outline: 3px so
       <p class="meta" id="doneMeta"></p>
       <ol>
         <li>Upload <code id="doneName">file.zip</code> to the members area of the website.</li>
-        <li>Delete the previous set there, so only this one can be downloaded.</li>
+        <li>Replace the previous set there with this one, keeping the file name exactly <code>SSANZ-Judge-Signatures.zip</code>, so the download link in the trial tools keeps working. If your browser saved it as <code>SSANZ-Judge-Signatures (1).zip</code>, rename it first.</li>
         <li>If you changed the password, send the new one to organisers separately from the file.</li>
         <li>Keep your master signatures folder backed up, for example on a USB stick at home.</li>
       </ol>
@@ -200,7 +200,7 @@ button:focus-visible, input:focus-visible, .drop:focus-visible { outline: 3px so
         <li><b>Lost the folder?</b> Open the current set on the <b>Open or check a set</b> tab and choose <b>Edit this set</b>. Its signatures come back into this list.</li>
         <li><b>What's protected:</b> the signatures can't be seen or copied without the password. The judges' names are still visible as file names in the ZIP, which is how ZIP files work.</li>
         <li><b>The password</b> should be different from the website login. Send it by phone or in a separate email, never with the file. A yearly change, or when an organiser steps down, is a sensible rhythm.</li>
-        <li><b>Inside the set</b> is a list of the judges and the date it was made. The trial tools use the date to spot old copies.</li>
+        <li><b>Rebuild at least every 6 months</b>, even if nothing has changed. Inside the set is a list of the judges and the date it was made, and the trial tools won't accept a set more than 6 months old. That stops organisers using an old copy that still holds a withdrawn judge's signature.</li>
         <li><b>Opening it yourself:</b> 7-Zip (Windows) or Keka (Mac) will open the set with the password. The ZIP opener built into Windows can't, because it doesn't understand this stronger protection.</li>
         <li><b>Each file</b> is checked when you drop it in. A warning means it may not have been made with the <a href="Judge-Signatures.html">Judge Signatures</a> page.</li>
       </ul>
@@ -552,7 +552,7 @@ function updateBuild() {
   if (example) note.textContent = "Add the real signature files to build a set.";
   else if (!n) note.textContent = "Add at least one signature.";
   else if (!pw.ok) note.textContent = "Set the password to build the set.";
-  else note.textContent = `Saves SSANZ-Judge-Signatures-${today()}.zip with ${n} signature${n === 1 ? "" : "s"}.`;
+  else note.textContent = `Saves SSANZ-Judge-Signatures.zip with ${n} signature${n === 1 ? "" : "s"}.`;
 }
 
 $("build").addEventListener("click", async () => {
@@ -576,13 +576,13 @@ $("build").addEventListener("click", async () => {
       const back = await SigZip.read(zip, listed[i], pw), want = entries[i].data;
       if (listed[i].name !== entries[i].name || back.length !== want.length || back.some((v, j) => v !== want[j])) throw new Error(`${entries[i].name} didn't come back unchanged`);
     }
-    const filename = `SSANZ-Judge-Signatures-${manifest.created}.zip`;
+    const filename = "SSANZ-Judge-Signatures.zip";   // fixed name: the trial tools link straight to this file
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([zip], { type: "application/zip" })); a.download = filename;
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 4000);
     $("doneName").textContent = filename;
-    $("doneMeta").textContent = `${filename} · ${all.length} signature${all.length === 1 ? "" : "s"} · ${kb(zip.length)} · saved to your Downloads folder`;
+    $("doneMeta").textContent = `${filename} · made ${niceDate(manifest.created)} · ${all.length} signature${all.length === 1 ? "" : "s"} · ${kb(zip.length)} · saved to your Downloads folder`;
     $("done").hidden = false;
     note.textContent = "Saved. Each signature was read back with the password and matched.";
   } catch (err) {
