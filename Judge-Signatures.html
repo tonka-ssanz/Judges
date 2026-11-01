@@ -79,12 +79,12 @@ button:focus-visible, input:focus-visible, .drop:focus-visible { outline: 3px so
 
 /* ---------- The printed form ---------- */
 .sheet-box { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: #e9ebe6; padding: 18px; }
-.sheet { width: 182mm; min-height: 257mm; margin: 0 auto; background: #fff; color: #111; padding: 12mm 13mm; font-family: var(--font-body); font-size: 10.5pt; line-height: 1.42; display: grid; gap: 4.2mm; align-content: start; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
+.sheet { width: 182mm; min-height: 257mm; margin: 0 auto; background: #fff; color: #111; padding: 12mm 13mm; font-family: var(--font-body); font-size: 10pt; line-height: 1.4; display: flex; flex-direction: column; gap: 4mm; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
 .sheet .s-head { display: grid; gap: 1mm; border-bottom: 1.2pt solid #111; padding-bottom: 3mm; }
 .sheet .s-org { font-size: 8.5pt; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; color: #2f6b4f; }
 .sheet h2 { font-family: var(--font-display); font-size: 20pt; color: #111; line-height: 1.1; }
 .sheet p { margin: 0; }
-.sheet .s-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm 8mm; }
+.sheet .s-fields { display: grid; grid-template-columns: minmax(0, 2.6fr) minmax(0, 1fr); gap: 4mm 8mm; align-items: end; }
 .sheet .s-field { display: grid; gap: 1mm; }
 .sheet .s-field b { font-size: 8.5pt; letter-spacing: .06em; text-transform: uppercase; }
 .sheet .s-field i { display: block; height: 9mm; border-bottom: 0.8pt solid #111; }
@@ -92,8 +92,9 @@ button:focus-visible, input:focus-visible, .drop:focus-visible { outline: 3px so
 .sheet .s-consent { border: 0.8pt solid #111; padding: 3.5mm 4mm; display: grid; gap: 2mm; }
 .sheet .s-consent h3 { font-size: 11pt; color: #111; }
 .sheet .s-consent ul { margin: 0; padding-left: 5mm; display: grid; gap: 1mm; }
-.sheet .s-boxes { display: grid; gap: 3mm; }
-.sheet .s-box { height: 26mm; border: 0.8pt dashed #b5b5b5; border-radius: 2mm; position: relative; }
+/* The signing boxes take whatever height is left, so wider fonts shrink the boxes instead of pushing text off the page. */
+.sheet .s-boxes { flex: 1 1 auto; display: grid; grid-template-rows: repeat(3, minmax(19mm, 1fr)); gap: 3mm; max-height: 96mm; }
+.sheet .s-box { border: 0.8pt dashed #b5b5b5; border-radius: 2mm; position: relative; }
 .sheet .s-box::before { content: attr(data-n); position: absolute; top: 1.5mm; left: 2.5mm; font-size: 8pt; color: #9a9a9a; }
 .sheet .s-box::after { content: ""; position: absolute; left: 10mm; right: 10mm; bottom: 7mm; border-bottom: 0.6pt solid #c4c4c4; }
 .sheet .s-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; }
@@ -173,7 +174,7 @@ button:focus-visible, input:focus-visible, .drop:focus-visible { outline: 3px so
   body.print-form #formPanel > *:not(.sheet-box) { display: none !important; }
   body.print-form .wrap { padding: 0; display: block; max-width: none; }
   body.print-form .sheet-box { border: 0; padding: 0; background: #fff; overflow: visible; }
-  body.print-form .sheet { box-shadow: none; width: 210mm; min-height: 0; height: 296mm; padding: 13mm 16mm; overflow: hidden; }
+  body.print-form .sheet { box-shadow: none; width: 210mm; min-height: 0; height: 295mm; padding: 12mm 15mm; }
 }
 </style>
 </head>
@@ -208,8 +209,7 @@ button:focus-visible, input:focus-visible, .drop:focus-visible { outline: 3px so
         </div>
         <p>SSANZ is offering trial organisers the option of printing judges' signatures on judging sheets, and on certificates where they can print them, to help everything run smoothly on the day of the trial. It also saves you hand-signing each one. If you're happy to take part, please fill in this form, sign three times in the boxes, and send it back.</p>
         <div class="s-fields">
-          <div class="s-field wide"><b>Your name, as it should appear on trial documents</b><i></i></div>
-          <div class="s-field"><b>Email</b><i></i></div>
+          <div class="s-field"><b>Your name, as it should appear on trial documents</b><i></i></div>
           <div class="s-field"><b>Date</b><i></i></div>
         </div>
         <div class="s-consent">
