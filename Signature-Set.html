@@ -1,0 +1,736 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Signature Set</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one working column, matching the other SSANZ judges tools. Two tabs: build a set, or open and check one. */
+:root {
+  --bg: #f5f6f2;
+  --surface: #ffffff;
+  --ink: #1d2420;
+  --muted: #5d6a62;
+  --line: #d9ded7;
+  --accent: #2f6b4f;
+  --accent-ink: #ffffff;
+  --accent-soft: #e3efe8;
+  --warn: #8a5a12;
+  --warn-soft: #f6ecd9;
+  --bad: #a3322a;
+  --check-a: #ffffff;
+  --check-b: #eef0ec;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141916; --surface: #1c2320; --ink: #e6ebe7; --muted: #9aa8a0; --line: #2f3933;
+    --accent: #6fbf95; --accent-ink: #0f1a14; --accent-soft: #213229; --warn: #e0b060; --warn-soft: #2e2618; --bad: #f0857a;
+    --check-a: #f4f5f2; --check-b: #e3e6e1;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141916; --surface: #1c2320; --ink: #e6ebe7; --muted: #9aa8a0; --line: #2f3933;
+  --accent: #6fbf95; --accent-ink: #0f1a14; --accent-soft: #213229; --warn: #e0b060; --warn-soft: #2e2618; --bad: #f0857a;
+  --check-a: #f4f5f2; --check-b: #e3e6e1;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.55; }
+.wrap { max-width: 820px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 32px 64px; display: grid; gap: 28px; }
+header { display: grid; gap: 8px; }
+.home { font-size: 14px; color: var(--muted); text-decoration: none; width: max-content; }
+.home:hover { color: var(--accent); text-decoration: underline; }
+.eyebrow { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 700; margin: 8px 0 0; }
+h1 { font-family: var(--font-display); font-size: clamp(30px, 6vw, 42px); line-height: 1.1; margin: 0; text-wrap: balance; }
+h2 { font-family: var(--font-display); font-size: 22px; margin: 0; text-wrap: balance; }
+h3 { font-family: var(--font-display); font-size: 17px; margin: 0; }
+.lede { margin: 0; color: var(--muted); max-width: 64ch; }
+.note { font-size: 14px; color: var(--muted); margin: 0; max-width: 66ch; }
+code { font-family: var(--font-mono); font-size: .9em; background: var(--accent-soft); padding: 1px 5px; border-radius: 4px; color: var(--ink); overflow-wrap: anywhere; }
+
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; border-bottom: 1px solid var(--line); }
+.tab { font: inherit; font-weight: 700; background: transparent; color: var(--muted); border: 0; border-bottom: 3px solid transparent; padding: 10px 4px; margin-right: 18px; cursor: pointer; border-radius: 0; }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.tab:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+section.panel { display: grid; gap: 20px; }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+
+button { font: inherit; font-weight: 700; border-radius: 10px; padding: 11px 18px; cursor: pointer; border: 1px solid var(--accent); }
+button.primary { background: var(--accent); color: var(--accent-ink); }
+button.secondary { background: transparent; color: var(--accent); }
+button.small { padding: 6px 12px; font-size: 14px; border-radius: 999px; }
+button.quiet { padding: 6px 10px; font-size: 14px; border-color: var(--line); color: var(--muted); background: transparent; font-weight: 400; }
+button.quiet:hover { border-color: var(--bad); color: var(--bad); }
+button:disabled { opacity: .45; cursor: not-allowed; }
+button:focus-visible, input:focus-visible, .drop:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+
+.drop { border: 2px dashed var(--line); border-radius: 14px; background: var(--surface); padding: 24px 20px; text-align: center; cursor: pointer; display: grid; gap: 4px; justify-items: center; transition: border-color .15s, background .15s; }
+.drop:hover, .drop.over { border-color: var(--accent); background: var(--accent-soft); }
+.drop strong { font-family: var(--font-display); font-size: 19px; }
+.drop span { color: var(--muted); font-size: 14px; }
+.drop-alt { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 6px; }
+
+.status { margin: 0; padding: 12px 14px; border-radius: 10px; background: var(--accent-soft); font-size: 15px; }
+.status.error { background: var(--warn-soft); border: 1px solid var(--warn); color: var(--ink); }
+
+.card { display: grid; gap: 14px; padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); min-width: 0; }
+.card-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 12px; }
+.tag { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; }
+
+.sigs { display: grid; gap: 8px; }
+.sig { display: grid; grid-template-columns: 150px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 8px 10px 8px 8px; border: 1px solid var(--line); border-radius: 10px; }
+.sig.flag { border-color: var(--warn); }
+.thumb { height: 56px; border-radius: 6px; display: grid; place-items: center; padding: 4px 8px; background: repeating-conic-gradient(var(--check-a) 0 25%, var(--check-b) 0 50%) 0 0 / 12px 12px; }
+.thumb img { max-width: 100%; max-height: 48px; }
+.sig-name { min-width: 0; display: grid; gap: 1px; }
+.sig-name b { overflow-wrap: anywhere; }
+.sig-name span { font-family: var(--font-mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.sig-name em { font-style: normal; font-size: 13px; color: var(--warn); }
+@media (max-width: 520px) { .sig { grid-template-columns: 96px minmax(0, 1fr); } .sig .quiet { grid-column: 2; justify-self: start; } }
+.empty { color: var(--muted); font-size: 15px; padding: 10px 2px; margin: 0; }
+
+.fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 560px) { .fields { grid-template-columns: 1fr; } }
+.field { display: grid; gap: 4px; min-width: 0; }
+.field label { font-size: 13px; font-weight: 700; color: var(--muted); }
+.field input { font: inherit; font-family: var(--font-mono); font-size: 15px; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; width: 100%; min-width: 0; }
+.showpw { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); cursor: pointer; }
+.showpw input { width: 17px; height: 17px; accent-color: var(--accent); margin: 0; }
+.pwmsg { margin: 0; font-size: 14px; }
+.pwmsg.ok { color: var(--accent); }
+.pwmsg.bad { color: var(--warn); }
+
+.done { display: grid; gap: 10px; padding: 16px 18px; border-radius: 12px; border: 1px solid var(--accent); background: var(--accent-soft); }
+.done ol { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+.done .meta { font-family: var(--font-mono); font-size: 13px; color: var(--muted); margin: 0; overflow-wrap: anywhere; }
+
+.facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.fact { background: var(--surface); padding: 12px 14px; display: grid; gap: 2px; min-width: 0; }
+.fact b { font-family: var(--font-display); font-size: 22px; line-height: 1.15; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.fact span { font-size: 13px; color: var(--muted); }
+.fact.old b { color: var(--warn); }
+@media (max-width: 560px) { .facts { grid-template-columns: 1fr; } }
+.warnline { margin: 0; font-size: 14px; color: var(--warn); }
+
+.help { border-top: 1px solid var(--line); padding-top: 20px; display: grid; gap: 10px; font-size: 15px; }
+.help ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; color: var(--muted); max-width: 66ch; }
+.help li b { color: var(--ink); }
+.help a { color: var(--accent); font-weight: 700; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="home" href="./">← Judges Tools</a>
+    <p class="eyebrow">SSANZ Judges Development Subcommittee</p>
+    <h1>Signature Set</h1>
+    <p class="lede">Put every judge's signature file into one password-protected ZIP for the members area of the website. Rebuild it whenever a judge joins, withdraws or sends a new signature. Everything happens in this page; nothing is uploaded.</p>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="What to do">
+    <button class="tab" role="tab" id="tabBuild" aria-controls="buildPanel" aria-selected="true" type="button">Build a set</button>
+    <button class="tab" role="tab" id="tabOpen" aria-controls="openPanel" aria-selected="false" type="button">Open or check a set</button>
+  </div>
+
+  <!-- ===== Build ===== -->
+  <section class="panel" id="buildPanel" role="tabpanel" aria-labelledby="tabBuild">
+    <label class="drop" id="drop" for="files" tabindex="0">
+      <strong>Drop all the signature files here</strong>
+      <span>The PNG files from your master signatures folder. Select them all at once, or add a few at a time.</span>
+      <input type="file" id="files" accept=".png,image/png" multiple hidden>
+    </label>
+    <div class="drop-alt"><button class="secondary small" id="pickFolder" type="button">Choose the whole folder instead</button></div>
+    <input type="file" id="folder" webkitdirectory multiple hidden>
+    <p class="status" id="addStatus" hidden></p>
+
+    <div class="card">
+      <div class="card-head">
+        <h2 id="sigCount">Signatures</h2>
+        <span class="row"><span class="tag" id="exampleTag">Example signatures</span><button class="quiet" id="clearAll" type="button">Remove all</button></span>
+      </div>
+      <p class="note">Each judge's name comes from the file name, so it must match the judges list exactly. To fix a name, rename the file in your master folder and add it again.</p>
+      <div class="sigs" id="sigList"></div>
+    </div>
+
+    <div class="card">
+      <h2>Password</h2>
+      <div class="fields">
+        <div class="field"><label for="pw">Password</label><input id="pw" type="password" autocomplete="new-password" spellcheck="false"></div>
+        <div class="field"><label for="pw2">Type it again</label><input id="pw2" type="password" autocomplete="new-password" spellcheck="false"></div>
+      </div>
+      <div class="row">
+        <label class="showpw"><input type="checkbox" id="showPw"> Show password</label>
+        <button class="secondary small" id="suggest" type="button">Suggest a strong password</button>
+        <button class="secondary small" id="copyPw" type="button">Copy password</button>
+      </div>
+      <p class="pwmsg" id="pwMsg">At least 12 characters. Use letters, numbers and keyboard symbols only.</p>
+      <p class="note">Keep using the same password unless you mean to change it. Organisers need the new one before they can open a set with a changed password.</p>
+    </div>
+
+    <div class="row">
+      <button class="primary" id="build" type="button" disabled>Build and save the set</button>
+      <span class="note" id="buildNote">Add the real signature files to build a set.</span>
+    </div>
+
+    <div class="done" id="done" hidden>
+      <h3>Saved and checked</h3>
+      <p class="meta" id="doneMeta"></p>
+      <ol>
+        <li>Upload <code id="doneName">file.zip</code> to the members area of the website.</li>
+        <li>Delete the previous set there, so only this one can be downloaded.</li>
+        <li>If you changed the password, send the new one to organisers separately from the file.</li>
+        <li>Keep your master signatures folder backed up, for example on a USB stick at home.</li>
+      </ol>
+    </div>
+
+    <section class="help">
+      <h3>Good to know</h3>
+      <ul>
+        <li><b>Always rebuild from the master folder.</b> Add, replace or delete the PNG file in your folder, then drop the whole folder in here. The new set then matches the folder exactly.</li>
+        <li><b>Lost the folder?</b> Open the current set on the <b>Open or check a set</b> tab and choose <b>Edit this set</b>. Its signatures come back into this list.</li>
+        <li><b>What's protected:</b> the signatures can't be seen or copied without the password. The judges' names are still visible as file names in the ZIP, which is how ZIP files work.</li>
+        <li><b>The password</b> should be different from the website login. Send it by phone or in a separate email, never with the file. A yearly change, or when an organiser steps down, is a sensible rhythm.</li>
+        <li><b>Inside the set</b> is a list of the judges and the date it was made. The trial tools use the date to spot old copies.</li>
+        <li><b>Opening it yourself:</b> 7-Zip (Windows) or Keka (Mac) will open the set with the password. The ZIP opener built into Windows can't, because it doesn't understand this stronger protection.</li>
+        <li><b>Each file</b> is checked when you drop it in. A warning means it may not have been made with the <a href="Judge-Signatures.html">Judge Signatures</a> page.</li>
+      </ul>
+    </section>
+  </section>
+
+  <!-- ===== Open or check ===== -->
+  <section class="panel" id="openPanel" role="tabpanel" aria-labelledby="tabOpen" hidden>
+    <label class="drop" id="zdrop" for="zfile" tabindex="0">
+      <strong>Drop a signature set here</strong>
+      <span id="zName">The .zip file, as downloaded from the members area</span>
+      <input type="file" id="zfile" accept=".zip,application/zip" hidden>
+    </label>
+    <div class="card">
+      <form class="row" id="openForm">
+        <div class="field" style="flex: 1 1 260px"><label for="opw">Password</label><input id="opw" type="password" autocomplete="current-password" spellcheck="false"></div>
+        <button class="primary" id="openBtn" type="submit" style="align-self: end" disabled>Open the set</button>
+      </form>
+    </div>
+    <p class="status" id="openStatus" hidden></p>
+
+    <div class="card" id="setCard" hidden>
+      <div class="card-head"><h2>What's in this set</h2><button class="secondary small" id="editSet" type="button">Edit this set</button></div>
+      <div class="facts">
+        <div class="fact" id="factAge"><b id="fMade">–</b><span id="fAge">made</span></div>
+        <div class="fact"><b id="fCount">0</b><span>signatures</span></div>
+        <div class="fact"><b id="fSize">–</b><span>file size</span></div>
+      </div>
+      <p class="warnline" id="setWarn" hidden></p>
+      <div class="sigs" id="setList"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+/* SigZip: password-protected ZIP files using WinZip AES-256 (the same standard 7-Zip uses), built with the
+   browser's own Web Crypto, so nothing is downloaded. Shared by the Signature Set page and, later, the trial tools.
+   Writes "stored" entries (PNG is already compressed). Reads stored or deflated entries. */
+const SigZip = (() => {
+  const subtle = globalThis.crypto.subtle;
+  const utf8 = new TextEncoder();
+
+  const CRC_TABLE = (() => {
+    const t = new Uint32Array(256);
+    for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; }
+    return t;
+  })();
+  function crc32(buf) {
+    let c = 0xFFFFFFFF;
+    for (let i = 0; i < buf.length; i++) c = CRC_TABLE[(c ^ buf[i]) & 0xff] ^ (c >>> 8);
+    return (c ^ 0xFFFFFFFF) >>> 0;
+  }
+  function concat(...arrs) {
+    const out = new Uint8Array(arrs.reduce((s, a) => s + a.length, 0));
+    let o = 0; for (const a of arrs) { out.set(a, o); o += a.length; }
+    return out;
+  }
+
+  /* Strength 1, 2, 3 = AES-128, 192, 256. Salt is half the key length. */
+  async function deriveKeys(password, salt, strength) {
+    const keyLen = 8 + 8 * strength;
+    const base = await subtle.importKey("raw", utf8.encode(password), "PBKDF2", false, ["deriveBits"]);
+    const bits = new Uint8Array(await subtle.deriveBits({ name: "PBKDF2", hash: "SHA-1", salt, iterations: 1000 }, base, (2 * keyLen + 2) * 8));
+    return {
+      aesKey: await subtle.importKey("raw", bits.slice(0, keyLen), { name: "AES-CTR" }, false, ["encrypt"]),
+      macKey: await subtle.importKey("raw", bits.slice(keyLen, 2 * keyLen), { name: "HMAC", hash: "SHA-1" }, false, ["sign"]),
+      verify: bits.slice(2 * keyLen, 2 * keyLen + 2),
+    };
+  }
+
+  /* WinZip AES counter mode: a 16-byte little-endian counter starting at 1. Web Crypto counts big-endian,
+     so each 16-byte block gets its own counter value; blocks are processed in parallel batches. */
+  async function aesCtrLE(aesKey, data) {
+    const blocks = Math.ceil(data.length / 16), out = new Uint8Array(data.length), zero = new Uint8Array(16);
+    for (let start = 0; start < blocks; start += 4096) {
+      const end = Math.min(blocks, start + 4096), jobs = [];
+      for (let b = start; b < end; b++) {
+        const ctr = new Uint8Array(16);
+        let v = b + 1;
+        for (let i = 0; v > 0 && i < 8; i++) { ctr[i] = v % 256; v = Math.floor(v / 256); }
+        jobs.push(subtle.encrypt({ name: "AES-CTR", counter: ctr, length: 64 }, aesKey, zero));
+      }
+      const ks = await Promise.all(jobs);
+      for (let j = 0; j < ks.length; j++) {
+        const k = new Uint8Array(ks[j]), off = (start + j) * 16, n = Math.min(16, data.length - off);
+        for (let i = 0; i < n; i++) out[off + i] = data[off + i] ^ k[i];
+      }
+    }
+    return out;
+  }
+
+  async function encryptData(password, data) {
+    const salt = globalThis.crypto.getRandomValues(new Uint8Array(16));
+    const { aesKey, macKey, verify } = await deriveKeys(password, salt, 3);
+    const ct = await aesCtrLE(aesKey, data);
+    const mac = new Uint8Array(await subtle.sign("HMAC", macKey, ct)).slice(0, 10);
+    return concat(salt, verify, ct, mac);
+  }
+
+  /* files: [{ name, data: Uint8Array }] → Uint8Array of a .zip */
+  async function build(files, password, when = new Date()) {
+    const time = ((when.getHours() << 11) | (when.getMinutes() << 5) | (when.getSeconds() >> 1)) & 0xffff;
+    const date = (((when.getFullYear() - 1980) << 9) | ((when.getMonth() + 1) << 5) | when.getDate()) & 0xffff;
+    const extra = new Uint8Array([0x01, 0x99, 7, 0, 1, 0, 0x41, 0x45, 3, 0, 0]);   // AE-1, "AE", AES-256, stored
+    const local = [], central = [];
+    let offset = 0;
+    for (const f of files) {
+      const name = utf8.encode(f.name), crc = crc32(f.data), body = await encryptData(password, f.data);
+      const lh = new DataView(new ArrayBuffer(30));
+      lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 51, true); lh.setUint16(6, 0x0801, true); lh.setUint16(8, 99, true);
+      lh.setUint16(10, time, true); lh.setUint16(12, date, true); lh.setUint32(14, crc, true);
+      lh.setUint32(18, body.length, true); lh.setUint32(22, f.data.length, true); lh.setUint16(26, name.length, true); lh.setUint16(28, extra.length, true);
+      local.push(new Uint8Array(lh.buffer), name, extra, body);
+      const ch = new DataView(new ArrayBuffer(46));
+      ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 63, true); ch.setUint16(6, 51, true); ch.setUint16(8, 0x0801, true); ch.setUint16(10, 99, true);
+      ch.setUint16(12, time, true); ch.setUint16(14, date, true); ch.setUint32(16, crc, true);
+      ch.setUint32(20, body.length, true); ch.setUint32(24, f.data.length, true); ch.setUint16(28, name.length, true); ch.setUint16(30, extra.length, true);
+      ch.setUint32(42, offset, true);
+      central.push(new Uint8Array(ch.buffer), name, extra);
+      offset += 30 + name.length + extra.length + body.length;
+    }
+    const cdSize = central.reduce((s, a) => s + a.length, 0);
+    const end = new DataView(new ArrayBuffer(22));
+    end.setUint32(0, 0x06054b50, true); end.setUint16(8, files.length, true); end.setUint16(10, files.length, true);
+    end.setUint32(12, cdSize, true); end.setUint32(16, offset, true);
+    return concat(...local, ...central, new Uint8Array(end.buffer));
+  }
+
+  class ZipError extends Error { constructor(code, message) { super(message); this.code = code; } }
+
+  /* Lists entries without a password. */
+  function list(bytes) {
+    const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    let e = -1;
+    for (let i = bytes.length - 22; i >= Math.max(0, bytes.length - 22 - 65535); i--) if (dv.getUint32(i, true) === 0x06054b50) { e = i; break; }
+    if (e < 0) throw new ZipError("notzip", "This isn't a ZIP file, or it's damaged.");
+    const count = dv.getUint16(e + 10, true);
+    let p = dv.getUint32(e + 16, true);
+    const entries = [];
+    for (let k = 0; k < count; k++) {
+      if (p + 46 > bytes.length || dv.getUint32(p, true) !== 0x02014b50) throw new ZipError("damaged", "This ZIP file is damaged.");
+      const nl = dv.getUint16(p + 28, true), xl = dv.getUint16(p + 30, true), cl = dv.getUint16(p + 32, true);
+      const ent = {
+        flags: dv.getUint16(p + 8, true), method: dv.getUint16(p + 10, true), crc: dv.getUint32(p + 16, true),
+        csize: dv.getUint32(p + 20, true), usize: dv.getUint32(p + 24, true), offset: dv.getUint32(p + 42, true),
+        name: new TextDecoder().decode(bytes.subarray(p + 46, p + 46 + nl)),
+        extra: bytes.subarray(p + 46 + nl, p + 46 + nl + xl),
+      };
+      if (!ent.name.endsWith("/")) entries.push(ent);
+      p += 46 + nl + xl + cl;
+    }
+    return entries;
+  }
+
+  function aesInfo(extra) {
+    for (let i = 0; i + 4 <= extra.length;) {
+      const id = extra[i] | (extra[i + 1] << 8), len = extra[i + 2] | (extra[i + 3] << 8);
+      if (id === 0x9901 && len >= 7) return { version: extra[i + 4] | (extra[i + 5] << 8), strength: extra[i + 8], method: extra[i + 9] | (extra[i + 10] << 8) };
+      i += 4 + len;
+    }
+    return null;
+  }
+
+  async function inflateRaw(data) {
+    if (typeof DecompressionStream === "undefined") throw new ZipError("unsupported", "This browser can't unpack compressed files. Use an up-to-date Chrome, Edge, Firefox or Safari.");
+    const stream = new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+    return new Uint8Array(await new Response(stream).arrayBuffer());
+  }
+
+  /* Reads one entry's contents. Throws ZipError "password" for a wrong password. */
+  async function read(bytes, ent, password) {
+    const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    const o = ent.offset;
+    if (dv.getUint32(o, true) !== 0x04034b50) throw new ZipError("damaged", "This ZIP file is damaged.");
+    const start = o + 30 + dv.getUint16(o + 26, true) + dv.getUint16(o + 28, true);
+    const body = bytes.subarray(start, start + ent.csize);
+    let method = ent.method, data, ae = null;
+    if (ent.flags & 1) {
+      ae = method === 99 ? aesInfo(ent.extra) : null;
+      if (!ae) throw new ZipError("unsupported", "This ZIP uses old-style ZipCrypto protection. Make it again with AES-256 encryption.");
+      if (password == null || password === "") throw new ZipError("password", "This set needs its password.");
+      const saltLen = 4 + 4 * ae.strength;
+      const salt = body.subarray(0, saltLen), check = body.subarray(saltLen, saltLen + 2);
+      const ct = body.subarray(saltLen + 2, body.length - 10), mac = body.subarray(body.length - 10);
+      const { aesKey, macKey, verify } = await deriveKeys(password, salt, ae.strength);
+      if (verify[0] !== check[0] || verify[1] !== check[1]) throw new ZipError("password", "The password is wrong.");
+      const got = new Uint8Array(await subtle.sign("HMAC", macKey, ct));
+      for (let i = 0; i < 10; i++) if (got[i] !== mac[i]) throw new ZipError("password", "The password is wrong, or the file is damaged.");
+      data = await aesCtrLE(aesKey, ct);
+      method = ae.method;
+    } else data = body.slice();
+    if (method === 8) data = await inflateRaw(data);
+    else if (method !== 0) throw new ZipError("unsupported", `${ent.name} uses a packing method this page can't read.`);
+    if ((!ae || ae.version === 1) && crc32(data) !== ent.crc) throw new ZipError("damaged", `${ent.name} is damaged.`);
+    return data;
+  }
+
+  return { build, list, read, crc32, ZipError };
+})();
+</script>
+<script>
+const $ = id => document.getElementById(id);
+const MANIFEST = "signature-set.json";
+const MIN_PW = 12;
+
+/* ---------- Tabs ---------- */
+function showTab(which) {
+  const b = which !== "open";
+  $("tabBuild").setAttribute("aria-selected", b); $("tabOpen").setAttribute("aria-selected", !b);
+  $("buildPanel").hidden = !b; $("openPanel").hidden = b;
+}
+$("tabBuild").addEventListener("click", () => { showTab("build"); try { history.replaceState(null, "", "#build"); } catch {} });
+$("tabOpen").addEventListener("click", () => { showTab("open"); try { history.replaceState(null, "", "#open"); } catch {} });
+window.addEventListener("hashchange", () => showTab(location.hash === "#open" ? "open" : "build"));
+
+/* ---------- Helpers ---------- */
+const keyOf = name => name.toLowerCase();
+const cleanName = file => file.replace(/\.png$/i, "").replace(/\s+/g, " ").trim();
+const isPng = b => b.length > 8 && b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4E && b[3] === 0x47;
+const kb = n => n < 1024 * 1024 ? Math.max(1, Math.round(n / 1024)) + " KB" : (n / 1024 / 1024).toFixed(1) + " MB";
+const today = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const niceDate = iso => { const [y, m, d] = iso.split("-").map(Number); return new Date(y, m - 1, d).toLocaleDateString("en-NZ", { day: "numeric", month: "short", year: "numeric" }); };
+function ageText(iso) {
+  const [y, m, d] = iso.split("-").map(Number), made = new Date(y, m - 1, d), now = new Date();
+  const days = Math.floor((now - made) / 86400000);
+  let months = (now.getFullYear() - y) * 12 + now.getMonth() - (m - 1); if (now.getDate() < d) months--;
+  if (days < 1) return { text: "made today", months: 0 };
+  if (months < 1) return { text: `made ${days} day${days === 1 ? "" : "s"} ago`, months: 0 };
+  return { text: `made ${months} month${months === 1 ? "" : "s"} ago`, months };
+}
+
+/* Reads a PNG's size and whether it has a see-through background. */
+function inspect(bytes) {
+  return new Promise(resolve => {
+    const url = URL.createObjectURL(new Blob([bytes], { type: "image/png" }));
+    const img = new Image();
+    img.onload = () => {
+      const w = img.naturalWidth, h = img.naturalHeight, s = Math.min(1, 200 / w);
+      const c = document.createElement("canvas"); c.width = Math.max(1, Math.round(w * s)); c.height = Math.max(1, Math.round(h * s));
+      const x = c.getContext("2d", { willReadFrequently: true }); x.drawImage(img, 0, 0, c.width, c.height);
+      const d = x.getImageData(0, 0, c.width, c.height).data;
+      let clear = 0; for (let i = 3; i < d.length; i += 4) if (d[i] < 200) clear++;
+      resolve({ ok: true, url, width: w, height: h, seeThrough: clear > d.length / 4 * 0.3 });
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve({ ok: false }); };
+    img.src = url;
+  });
+}
+function warningsFor(s) {
+  const w = [];
+  if (!s.seeThrough) w.push("No see-through background");
+  if (s.width > 1600 || s.height > 600) w.push(`Larger than usual (${s.width} × ${s.height})`);
+  return w;
+}
+
+/* ---------- The list being built ---------- */
+let sigs = new Map();    // key → { name, bytes, url, width, height, seeThrough, warn }
+let example = true;
+
+function renderSigs() {
+  const list = $("sigList"); list.textContent = "";
+  const all = [...sigs.values()].sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
+  $("sigCount").textContent = all.length ? `${all.length} signature${all.length === 1 ? "" : "s"}` : "Signatures";
+  $("exampleTag").hidden = !example;
+  $("clearAll").hidden = example || !all.length;
+  if (!all.length) { const p = document.createElement("p"); p.className = "empty"; p.textContent = "No signatures yet. Drop the files from your master folder above."; list.appendChild(p); }
+  for (const s of all) {
+    const row = document.createElement("div"); row.className = "sig" + (s.warn.length ? " flag" : "");
+    const th = document.createElement("div"); th.className = "thumb";
+    const img = document.createElement("img"); img.src = s.url; img.alt = ""; th.appendChild(img);
+    const nm = document.createElement("div"); nm.className = "sig-name";
+    const b = document.createElement("b"); b.textContent = s.name;
+    const meta = document.createElement("span"); meta.textContent = `${s.name}.png · ${s.width} × ${s.height} · ${kb(s.bytes.length)}`;
+    nm.append(b, meta);
+    if (s.warn.length) { const em = document.createElement("em"); em.textContent = s.warn.join(" · "); nm.appendChild(em); }
+    const rm = document.createElement("button"); rm.type = "button"; rm.className = "quiet"; rm.textContent = "Remove";
+    rm.setAttribute("aria-label", "Remove " + s.name);
+    rm.addEventListener("click", () => { URL.revokeObjectURL(s.url); sigs.delete(keyOf(s.name)); renderSigs(); });
+    if (example) rm.hidden = true;
+    row.append(th, nm, rm); list.appendChild(row);
+  }
+  $("done").hidden = true;
+  updateBuild();
+}
+
+function clearSigs() { for (const s of sigs.values()) URL.revokeObjectURL(s.url); sigs = new Map(); }
+
+function addStatus(msg, isError) { const s = $("addStatus"); s.textContent = msg; s.className = "status" + (isError ? " error" : ""); s.hidden = !msg; }
+
+async function addFiles(fileList) {
+  const files = [...fileList].filter(f => !f.name.startsWith("."));
+  if (!files.length) return;
+  if (example) { clearSigs(); example = false; }
+  let added = 0, replaced = [], skipped = [];
+  for (const f of files) {
+    if (!/\.png$/i.test(f.name)) { skipped.push(f.name); continue; }
+    const bytes = new Uint8Array(await f.arrayBuffer());
+    if (!isPng(bytes)) { skipped.push(f.name); continue; }
+    const info = await inspect(bytes);
+    if (!info.ok) { skipped.push(f.name); continue; }
+    const name = cleanName(f.name);
+    if (!name) { skipped.push(f.name); continue; }
+    const old = sigs.get(keyOf(name));
+    if (old) { URL.revokeObjectURL(old.url); replaced.push(name); }
+    const s = { name, bytes, url: info.url, width: info.width, height: info.height, seeThrough: info.seeThrough };
+    s.warn = warningsFor(s);
+    sigs.set(keyOf(name), s); added++;
+  }
+  const parts = [];
+  if (added) parts.push(`Added ${added} signature${added === 1 ? "" : "s"}.`);
+  if (replaced.length) parts.push(`Replaced with the newer file: ${replaced.join(", ")}.`);
+  if (skipped.length) parts.push(`Left out ${skipped.length} file${skipped.length === 1 ? "" : "s"} that ${skipped.length === 1 ? "isn't a" : "aren't"} PNG signature${skipped.length === 1 ? "" : "s"}: ${skipped.slice(0, 5).join(", ")}${skipped.length > 5 ? "…" : ""}.`);
+  addStatus(parts.join(" "), !added && skipped.length > 0);
+  renderSigs();
+}
+
+/* ---------- Password ---------- */
+function pwState() {
+  const a = $("pw").value, b = $("pw2").value;
+  if (!a) return { ok: false, msg: `At least ${MIN_PW} characters. Use letters, numbers and keyboard symbols only.`, cls: "" };
+  if (/[^\x20-\x7E]/.test(a)) return { ok: false, msg: "Use letters, numbers and keyboard symbols only (no accented letters or emoji), so every computer can type it.", cls: "bad" };
+  if (a.length < MIN_PW) return { ok: false, msg: `Too short: ${a.length} of at least ${MIN_PW} characters.`, cls: "bad" };
+  if (a.trim() !== a) return { ok: false, msg: "Remove the space at the start or end.", cls: "bad" };
+  if (!b) return { ok: false, msg: "Now type it again in the second box.", cls: "" };
+  if (a !== b) return { ok: false, msg: "The two passwords don't match.", cls: "bad" };
+  return { ok: true, msg: "Password is ready.", cls: "ok" };
+}
+function renderPw() { const s = pwState(), m = $("pwMsg"); m.textContent = s.msg; m.className = "pwmsg " + s.cls; updateBuild(); }
+["pw", "pw2"].forEach(id => $(id).addEventListener("input", () => { $("done").hidden = true; renderPw(); }));
+$("showPw").addEventListener("change", e => { $("pw").type = $("pw2").type = e.target.checked ? "text" : "password"; });
+$("suggest").addEventListener("click", () => {
+  const abc = "ABCDEFGHJKMNPQRSTUVWXYZ23456789", out = [];
+  while (out.length < 16) { const r = crypto.getRandomValues(new Uint8Array(1))[0]; if (r < 248) out.push(abc[r % 31]); }
+  const pw = out.join("").replace(/(.{4})(?!$)/g, "$1-");
+  $("pw").value = $("pw2").value = pw; $("showPw").checked = true; $("pw").type = $("pw2").type = "text";
+  $("done").hidden = true; renderPw();
+});
+$("copyPw").addEventListener("click", () => {
+  const btn = $("copyPw"), done = t => { btn.textContent = t; setTimeout(() => btn.textContent = "Copy password", 2000); };
+  if (!$("pw").value) return done("Nothing to copy");
+  try { navigator.clipboard.writeText($("pw").value).then(() => done("Copied"), () => { $("pw").type = "text"; $("pw").select(); done("Select and copy"); }); }
+  catch { $("pw").type = "text"; $("pw").select(); done("Select and copy"); }
+});
+
+/* ---------- Build ---------- */
+function updateBuild() {
+  const pw = pwState(), n = sigs.size, note = $("buildNote");
+  $("build").disabled = example || !n || !pw.ok;
+  if (example) note.textContent = "Add the real signature files to build a set.";
+  else if (!n) note.textContent = "Add at least one signature.";
+  else if (!pw.ok) note.textContent = "Set the password to build the set.";
+  else note.textContent = `Saves SSANZ-Judge-Signatures-${today()}.zip with ${n} signature${n === 1 ? "" : "s"}.`;
+}
+
+$("build").addEventListener("click", async () => {
+  if ($("build").disabled) return;
+  const btn = $("build"), note = $("buildNote"), pw = $("pw").value;
+  btn.disabled = true; $("done").hidden = true;
+  try {
+    const now = new Date(), all = [...sigs.values()].sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
+    const manifest = {
+      title: "SSANZ judge signatures", created: today(now), createdAt: now.toISOString(),
+      judges: all.map(s => ({ name: s.name, file: s.name + ".png", width: s.width, height: s.height })),
+    };
+    const entries = [{ name: MANIFEST, data: new TextEncoder().encode(JSON.stringify(manifest, null, 2)) },
+                     ...all.map(s => ({ name: s.name + ".png", data: s.bytes }))];
+    note.textContent = "Building…";
+    const zip = await SigZip.build(entries, pw, now);
+    note.textContent = "Checking the finished set opens with the password…";
+    const listed = SigZip.list(zip);
+    if (listed.length !== entries.length) throw new Error("the finished set is missing files");
+    for (let i = 0; i < entries.length; i++) {
+      const back = await SigZip.read(zip, listed[i], pw), want = entries[i].data;
+      if (listed[i].name !== entries[i].name || back.length !== want.length || back.some((v, j) => v !== want[j])) throw new Error(`${entries[i].name} didn't come back unchanged`);
+    }
+    const filename = `SSANZ-Judge-Signatures-${manifest.created}.zip`;
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([zip], { type: "application/zip" })); a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    $("doneName").textContent = filename;
+    $("doneMeta").textContent = `${filename} · ${all.length} signature${all.length === 1 ? "" : "s"} · ${kb(zip.length)} · saved to your Downloads folder`;
+    $("done").hidden = false;
+    note.textContent = "Saved. Each signature was read back with the password and matched.";
+  } catch (err) {
+    note.textContent = "The set wasn't saved: " + (err.message || err) + ". Try again, and if it keeps happening, reload the page.";
+  } finally { btn.disabled = false; updateBuildKeepNote(); }
+});
+function updateBuildKeepNote() { const t = $("buildNote").textContent; updateBuild(); $("buildNote").textContent = t; }
+
+/* ---------- Adding files ---------- */
+$("files").addEventListener("change", e => { addFiles(e.target.files); e.target.value = ""; });
+$("folder").addEventListener("change", e => { addFiles(e.target.files); e.target.value = ""; });
+$("pickFolder").addEventListener("click", () => $("folder").click());
+$("clearAll").addEventListener("click", () => { clearSigs(); addStatus("Removed all signatures from the list. Your files are untouched."); renderSigs(); });
+function dropZone(el, input, onFiles) {
+  ["dragenter", "dragover"].forEach(t => el.addEventListener(t, e => { e.preventDefault(); el.classList.add("over"); }));
+  ["dragleave", "drop"].forEach(t => el.addEventListener(t, e => { e.preventDefault(); el.classList.remove("over"); }));
+  el.addEventListener("drop", async e => {
+    const items = [...(e.dataTransfer.items || [])].map(i => i.webkitGetAsEntry && i.webkitGetAsEntry()).filter(Boolean);
+    if (items.some(i => i.isDirectory)) onFiles(await filesFromEntries(items)); else onFiles(e.dataTransfer.files);
+  });
+  el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); input.click(); } });
+}
+/* A dropped folder: read the files inside it (one level down is enough for a signatures folder). */
+async function filesFromEntries(entries) {
+  const out = [];
+  const fileOf = en => new Promise(r => en.file(r, () => r(null)));
+  for (const en of entries) {
+    if (en.isFile) { const f = await fileOf(en); if (f) out.push(f); }
+    else if (en.isDirectory) {
+      const reader = en.createReader();
+      for (;;) {
+        const batch = await new Promise(r => reader.readEntries(r, () => r([])));
+        if (!batch.length) break;
+        for (const c of batch) if (c.isFile) { const f = await fileOf(c); if (f) out.push(f); }
+      }
+    }
+  }
+  return out;
+}
+dropZone($("drop"), $("files"), addFiles);
+
+/* ---------- Open or check ---------- */
+let zipBytes = null, zipFileName = "", opened = null;
+function openStatus(msg, isError) { const s = $("openStatus"); s.textContent = msg; s.className = "status" + (isError ? " error" : ""); s.hidden = !msg; }
+async function takeZip(fileList) {
+  const f = [...fileList][0]; if (!f) return;
+  $("setCard").hidden = true; opened = null;
+  if (!/\.zip$/i.test(f.name)) { openStatus("That isn't a ZIP file. Drop the signature set (.zip) from the members area.", true); return; }
+  zipBytes = new Uint8Array(await f.arrayBuffer()); zipFileName = f.name;
+  $("zName").textContent = `${f.name} · ${kb(f.size)}`;
+  try { SigZip.list(zipBytes); } catch (err) { zipBytes = null; openStatus(err.message, true); $("openBtn").disabled = true; return; }
+  openStatus("Now type the password and choose Open the set.");
+  $("openBtn").disabled = false; $("opw").focus();
+}
+$("zfile").addEventListener("change", e => { takeZip(e.target.files); e.target.value = ""; });
+dropZone($("zdrop"), $("zfile"), takeZip);
+
+$("openForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (!zipBytes) { openStatus("Drop the signature set first.", true); return; }
+  const pw = $("opw").value, btn = $("openBtn");
+  btn.disabled = true; openStatus("Opening…");
+  try {
+    const entries = SigZip.list(zipBytes);
+    let manifest = null; const pngs = [];
+    for (const ent of entries) {
+      const data = await SigZip.read(zipBytes, ent, pw);
+      if (ent.name === MANIFEST) { try { manifest = JSON.parse(new TextDecoder().decode(data)); } catch {} }
+      else if (/\.png$/i.test(ent.name) && isPng(data)) pngs.push({ name: cleanName(ent.name.split("/").pop()), bytes: data });
+    }
+    const list = [];
+    for (const p of pngs) { const info = await inspect(p.bytes); if (info.ok) { const s = { ...p, url: info.url, width: info.width, height: info.height, seeThrough: info.seeThrough }; s.warn = warningsFor(s); list.push(s); } }
+    list.sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
+    if (opened) opened.list.forEach(s => URL.revokeObjectURL(s.url));
+    opened = { list, manifest, pw };
+    showSet(); openStatus("");
+  } catch (err) {
+    openStatus(err.code === "password" ? "That password doesn't open this set. Check it and try again." : (err.message || String(err)), true);
+  } finally { btn.disabled = false; }
+});
+
+function showSet() {
+  const { list, manifest } = opened, warn = [];
+  if (manifest && /^\d{4}-\d{2}-\d{2}$/.test(manifest.created || "")) {
+    const age = ageText(manifest.created);
+    $("fMade").textContent = niceDate(manifest.created); $("fAge").textContent = age.text;
+    $("factAge").classList.toggle("old", age.months >= 6);
+    if (age.months >= 6) warn.push("This set is 6 months old or more. Check it's the latest one in the members area.");
+    const names = new Set(list.map(s => keyOf(s.name)));
+    const missing = (manifest.judges || []).filter(j => !names.has(keyOf(j.name || ""))).map(j => j.name);
+    if (missing.length) warn.push(`Listed but missing from the set: ${missing.join(", ")}.`);
+  } else {
+    $("fMade").textContent = "Unknown"; $("fAge").textContent = "made"; $("factAge").classList.remove("old");
+    warn.push("This ZIP has no judge list or date inside, so it wasn't made with this page. Build a new set from these signatures.");
+  }
+  $("fCount").textContent = list.length; $("fSize").textContent = kb(zipBytes.length);
+  $("setWarn").textContent = warn.join(" "); $("setWarn").hidden = !warn.length;
+  const box = $("setList"); box.textContent = "";
+  if (!list.length) { const p = document.createElement("p"); p.className = "empty"; p.textContent = "No signature files in this set."; box.appendChild(p); }
+  for (const s of list) {
+    const row = document.createElement("div"); row.className = "sig" + (s.warn.length ? " flag" : "");
+    const th = document.createElement("div"); th.className = "thumb";
+    const img = document.createElement("img"); img.src = s.url; img.alt = ""; th.appendChild(img);
+    const nm = document.createElement("div"); nm.className = "sig-name";
+    const b = document.createElement("b"); b.textContent = s.name;
+    const meta = document.createElement("span"); meta.textContent = `${s.width} × ${s.height} · ${kb(s.bytes.length)}`;
+    nm.append(b, meta);
+    if (s.warn.length) { const em = document.createElement("em"); em.textContent = s.warn.join(" · "); nm.appendChild(em); }
+    row.append(th, nm, document.createElement("span")); box.appendChild(row);
+  }
+  $("editSet").disabled = !list.length;
+  $("setCard").hidden = false;
+}
+
+$("editSet").addEventListener("click", async () => {
+  if (!opened || !opened.list.length) return;
+  clearSigs(); example = false;
+  for (const s of opened.list) { const info = await inspect(s.bytes); const c = { name: s.name, bytes: s.bytes, url: info.url, width: s.width, height: s.height, seeThrough: s.seeThrough }; c.warn = warningsFor(c); sigs.set(keyOf(s.name), c); }
+  $("pw").value = $("pw2").value = opened.pw;
+  addStatus(`Loaded ${sigs.size} signature${sigs.size === 1 ? "" : "s"} from ${zipFileName}, with the same password. Add, replace or remove signatures, then build the new set.`);
+  renderSigs(); renderPw(); showTab("build");
+  try { history.replaceState(null, "", "#build"); } catch {}
+  $("drop").scrollIntoView({ block: "start" });
+});
+
+/* ---------- Opening view: three made-up signatures, so the list shows what it does ---------- */
+async function exampleSig(seed) {
+  const c = document.createElement("canvas"); c.width = 900; c.height = 260;
+  const x = c.getContext("2d"); let r = seed;
+  const rnd = () => (r = (r * 9301 + 49297) % 233280) / 233280;
+  x.strokeStyle = "#14161a"; x.lineWidth = 7; x.lineCap = "round"; x.lineJoin = "round";
+  x.beginPath(); let px = 40, py = 150 + rnd() * 40; x.moveTo(px, py);
+  while (px < 820) { const nx = px + 40 + rnd() * 60, ny = 70 + rnd() * 130; x.bezierCurveTo(px + 20, py - 90 * rnd(), nx - 20, ny + 90 * rnd(), nx, ny); px = nx; py = ny; }
+  x.stroke(); x.lineWidth = 5; x.beginPath(); x.moveTo(90, 225); x.quadraticCurveTo(450, 205 + rnd() * 30, 820, 215); x.stroke();
+  return new Uint8Array(await new Promise(res => c.toBlob(b => b.arrayBuffer().then(res), "image/png")));
+}
+(async () => {
+  showTab(location.hash === "#open" ? "open" : "build");
+  const names = ["Kiri Sample", "Sam Example", "Tom Demo"];
+  for (let i = 0; i < names.length; i++) {
+    const bytes = await exampleSig(17 + i * 101), info = await inspect(bytes);
+    if (!example) return;   // real files were added while the examples were being drawn
+    const s = { name: names[i], bytes, url: info.url, width: info.width, height: info.height, seeThrough: info.seeThrough }; s.warn = warningsFor(s);
+    sigs.set(keyOf(s.name), s);
+  }
+  renderSigs();
+})();
+renderSigs(); renderPw();
+</script>
+</body>
+</html>
